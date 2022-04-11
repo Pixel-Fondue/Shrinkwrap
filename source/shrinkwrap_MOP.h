@@ -1,14 +1,14 @@
-#include <lxidef.h>
+#pragma once
+
 #include <lx_mesh.hpp>
 #include <lx_surface.hpp>
-#include <lx_pmodel.hpp>
+
 #include <lxu_attributes.hpp>
 #include <lxu_math.hpp>
 
 #include <lxu_package.hpp>
 #include <lxu_modifier.hpp>
 #include <lx_channelui.hpp>
-#include <lxu_attributes.hpp>
 
 #include <lx_schematic.hpp>   // To Use CLxImpl_SchematicConnection
 
@@ -16,12 +16,10 @@
 #include <lx_locator.hpp>  // Both required for reading the world matrix.
 
 #include <vector>
-#include <random>
 
-#include "defines.h"
 
 #include "graph_Falloff.h"  // Falloff Graph
-
+#include "defines.h"
 
 class SWrap_Instance : public CLxImpl_PackageInstance
 {
@@ -85,10 +83,6 @@ public:
 private:
 	CLxSpawner <SWrap_Instance>	 _inst_spawn;
 };
-
-
-
-
 
 
 

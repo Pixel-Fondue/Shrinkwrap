@@ -1,5 +1,5 @@
 #include "graph_Falloff.h"
-
+#include "defines.h"
 
 void FalloffGraph::initialize()
 {

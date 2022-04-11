@@ -3,11 +3,7 @@
 
 
 #include <lx_deform.hpp> // Needed to read falloff items
-#include <lx_schematic.hpp>   // To Use CLxImpl_SchematicConnection
-
-#include "defines.h"
-
-
+#include <lx_schematic.hpp>   // CLxImpl_SchematicConnection
 
 class FalloffGraph : public CLxImpl_SchematicConnection
 {

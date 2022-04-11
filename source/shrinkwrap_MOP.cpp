@@ -1,21 +1,13 @@
 #include "shrinkwrap_MOP.h"
-#include "modo_simplelog.h"
 #include "modo_matrix.h"
 
-//#include "lx_log.hpp"
-#include <string>
-#include <utility>
+#include <lxidef.h>
+#include <lx_pmodel.hpp>
+#include <lxu_attributes.hpp>
 
+#include <random>
 #include <iostream>
 using namespace std;
-
-
-
-
-
-
-
-
 
 /*
 *	The Package and PackageInstance define the item that is added to the
@@ -112,9 +104,9 @@ LxResult
 }
 
 
-	/* Enabled method will be called to query whether a channel of given name
-	* (first argument) should be enabled or disabled.
-	* Returning LXe_OK means enabled, LXe_CMD_DISABLED otherwise.
+	/* cui_Enabled method will be called to query whether a channel of given name
+	* (channelName) should be enabled or disabled.
+	* Return LXe_OK for enabled, LXe_CMD_DISABLED otherwise.
 	*/
 	LxResult
 		SWrap_Package::cui_Enabled(
@@ -201,7 +193,7 @@ LxResult
 		LXtTagInfoDesc SWrap_Package::descInfo[] =
 {
 	{ LXsPKG_SUPERTYPE, LXsITYPE_MESHOP },
-	{ LXsPKG_GRAPHS, SWRAP_GRAPH_BG_MESH ";" SWRAP_FALLOFF_GRAPH },
+	{ LXsPKG_GRAPHS, SWRAP_GRAPH_BG_MESH ";" SWRAP_FALLOFF_GRAPH }, // This lines specifies schematic connection plugs.
 	{ 0 }
 };
 
@@ -392,7 +384,6 @@ SWRAP_VertexVisitor::evaluate(){
 	if (!is_identity_matrix){
 		// Convert to bg space
 		mulPtByMatrix(pos, pre_matrix);
-		//Simple_log{}("pos: " + to_string(pos[0]) + " " + to_string(pos[1]) + " " + to_string(pos[2]));
 	}
 
 	// This method finds the closest polygon from the given position. 
@@ -467,11 +458,6 @@ SWRAP_VertexVisitor::evaluate(){
 		}
 	}
 
-
-
-	//LXx_VSCL(hitNorm, -_wrap * hitDist); // Invert and scale by e_factor
-	//LXx_VADD(pos, hitNorm);
-
 	// Falloff Item Weight
 	double factor = _wrap;
 	if (falloffs.size > 0){
@@ -481,7 +467,7 @@ SWRAP_VertexVisitor::evaluate(){
 			CLxUser_Falloff fo = falloffs[f];
 			if (fo.test()){
 				mulPtByMatrix(fpos, item_matrix);
-				pos_weight += fo.WeightF(fpos);
+				pos_weight += fo.WeightF(fpos, point.ID(), polygon.ID());
 			}
 		}
 		pos_weight /= falloffs.size;
@@ -495,7 +481,6 @@ SWRAP_VertexVisitor::evaluate(){
 	if (!is_identity_matrix){
 		// Convert back to layer space
 		mulPtByMatrix(pos, post_matrix);
-		//Simple_log{}("pos post: " + to_string(pos[0]) + " " + to_string(pos[1]) + " " + to_string(pos[2]));
 	}
 
 	point.SetPos(pos);
@@ -641,7 +626,6 @@ LxResult
 	copyMatrix4(_mop_matrix, vis.item_matrix);
 	is_mat_identity = isIdentity4(_mop_matrix);
 	if (!is_bgmat_identity || !is_mat_identity) {
-		//CLxMatrix4 cl_wmat(wmat);
 		bool success = inverse(_mop_matrix, wmat_inverse);
 		if (success){
 			if (is_bgmat_identity){
@@ -717,14 +701,14 @@ SWrap_ModElement::SWrap_ModElement(
 		_maxDistance_idx = eval.AddChan(item, "maxDistance", LXfECHAN_READ);
 		_doubleSided_idx = eval.AddChan(item, "doubleSided", LXfECHAN_READ);
 
-		// Add mesh souce item channel
+		// Add mesh source item channel
 		CLxUser_ItemGraph meshGraph;
 		unsigned int meshRevCount;
 
 		// Very important read about graphs, plugs and channels
 		// See also the Graph : CLxImpl_SchematicConnection implemented above
 		// https://community.foundry.com/discuss/topic/82826
-		if (meshGraph.from(item, SWRAP_GRAPH_BG_MESH));
+		if (meshGraph.from(item, SWRAP_GRAPH_BG_MESH))
 		{
 			LxResult result = meshGraph.RevCount(item, &meshRevCount);
 			if (result != LXe_OK){
@@ -967,10 +951,8 @@ const char *
 const char* SWrap_ModServer::GraphNames() 
 {
 	/*
-	* List of space - separated graph names that trigger this modifier to update(optional)
+	* List of space-separated graph names that trigger this modifier to update(optional)
 	*/
-	// Example
-	// return LOCATOR_GRAPH_NAME " " CURVE_GUIDE_GRAPH_NAME;
 	return SWRAP_GRAPH_BG_MESH " " SWRAP_FALLOFF_GRAPH;
 }
 
